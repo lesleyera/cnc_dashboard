@@ -10,55 +10,69 @@ from datetime import datetime
 st.set_page_config(
     layout="wide",
     page_title="쿡앤셰프 주간 성과보고서",
-    page_icon="📊",
+    page_icon="📰",
     initial_sidebar_state="collapsed"
 )
 
-# ----------------- CSS & 스타일링 (디자인 업그레이드) -----------------
-CSS = """
+# ----------------- 컬러 팔레트 (Cook & Chef Red & Navy) -----------------
+# 메인 컬러: 깊이감 있는 네이비 (본문, 기본 차트)
+COLOR_NAVY = "#1a237e" 
+# 포인트 컬러: 쿡앤셰프 CI 레드 (강조, KPI 상단, 중요 데이터)
+COLOR_RED = "#d32f2f" 
+# 서브 컬러: 차분한 웜그레이 (보조 차트)
+COLOR_GREY = "#78909c"
+# 배경 포인트: 아주 연한 바닐라/웜톤 (헤더 배경 등)
+COLOR_BG_ACCENT = "#fffcf7" 
+
+# 차트용 시퀀스 (네이비 - 레드 - 그레이 조화)
+CHART_PALETTE = [COLOR_NAVY, COLOR_RED, "#5c6bc0", "#ef5350", COLOR_GREY]
+
+# ----------------- CSS & 스타일링 -----------------
+CSS = f"""
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
 
 /* 전체 폰트 및 레이아웃 */
-body {
+body {{
     background-color: #ffffff;
     font-family: 'Pretendard', sans-serif;
-    color: #111827;
-}
-.block-container {
+    color: #263238;
+}}
+.block-container {{
     padding-top: 2rem;
     padding-bottom: 5rem;
-    max_width: 1600px; /* 화면 폭 넓게 활용 */
-}
-[data-testid="stSidebar"] { display: none; }
+    max_width: 1600px;
+}}
+[data-testid="stSidebar"] {{ display: none; }}
 
 /* 헤더 타이틀 */
-.report-title {
+.report-title {{
     font-size: 2.6rem;
-    font-weight: 800;
-    color: #3e2723; /* 다크 브라운 */
+    font-weight: 900;
+    color: {COLOR_NAVY};
     margin-bottom: 0.5rem;
-    letter-spacing: -0.03em;
-    border-bottom: 4px solid #3e2723;
+    letter-spacing: -0.02em;
+    border-bottom: 4px solid {COLOR_RED}; /* CI 레드 포인트 */
     padding-bottom: 15px;
-}
+}}
 
-/* 데이터 집계 시간 강조 (파란색 유지) */
-.update-time {
-    color: #1e88e5; /* 선명한 파랑 */
-    font-weight: 700;
-    font-size: 1.1rem;
+/* 데이터 집계 시간 */
+.update-time {{
+    color: {COLOR_NAVY};
+    font-weight: 600;
+    font-size: 1rem;
     text-align: right;
     margin-top: -15px;
     margin-bottom: 30px;
     font-family: monospace;
-}
+    opacity: 0.8;
+}}
 
 /* KPI 카드 스타일 */
-.kpi-container {
+.kpi-container {{
     background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-top: 5px solid #1e88e5; /* 상단 파란색 포인트 */
+    border: 1px solid #eceff1;
+    border-top: 5px solid {COLOR_RED}; /* 레드 포인트 */
     border-radius: 8px;
     padding: 25px 15px;
     text-align: center;
@@ -67,107 +81,119 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-}
-.kpi-label {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s;
+}}
+.kpi-container:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+}}
+.kpi-label {{
     font-size: 1.05rem;
     font-weight: 700;
-    color: #5d4037; /* 브라운 텍스트 */
+    color: #546e7a; 
     margin-bottom: 12px;
-}
-.kpi-value {
+}}
+.kpi-value {{
     font-size: 2.4rem;
     font-weight: 800;
-    color: #1565c0;    /* 파란색 숫자 */
+    color: {COLOR_NAVY}; /* 숫자는 가독성 좋은 네이비 */
     line-height: 1;
     letter-spacing: -0.03em;
-}
-.kpi-unit {
+}}
+.kpi-unit {{
     font-size: 1rem;
-    font-weight: 500;
-    color: #9ca3af;
+    font-weight: 600;
+    color: #90a4ae;
     margin-left: 3px;
-}
+}}
 
-/* 섹션 타이틀 (화면 폭만큼 꽉 차게, 디자인 개선) */
-.section-header-container {
+/* 섹션 타이틀 (바닐라톤 배경으로 부드럽게) */
+.section-header-container {{
     margin-top: 50px;
     margin-bottom: 25px;
-    padding: 15px 20px;
-    background-color: #efebe9; /* 연한 브라운 배경 */
-    border-left: 8px solid #3e2723; /* 진한 브라운 바 */
+    padding: 18px 25px;
+    background-color: {COLOR_BG_ACCENT}; /* 연한 바닐라 배경 */
+    border-left: 8px solid {COLOR_NAVY};
     border-radius: 4px;
-}
-.section-header {
+}}
+.section-header {{
     font-size: 1.7rem;
     font-weight: 800;
-    color: #3e2723;
+    color: {COLOR_NAVY};
     margin: 0;
-}
-.section-desc {
+}}
+.section-desc {{
     font-size: 1rem;
-    color: #6d4c41;
-    margin-top: 5px;
-}
+    color: #5d4037; /* 따뜻한 브라운 톤의 설명 텍스트 */
+    margin-top: 6px;
+    font-weight: 500;
+}}
 
 /* 차트 소제목 */
-.chart-header {
+.chart-header {{
     font-size: 1.25rem;
     font-weight: 700;
-    color: #4e342e;
+    color: #37474f;
     margin-top: 25px;
     margin-bottom: 15px;
-    padding-left: 10px;
-    border-left: 4px solid #8d6e63; /* 브라운 라인 */
-}
+    padding-left: 12px;
+    border-left: 4px solid {COLOR_RED}; /* 레드 라인 */
+}}
 
-/* 탭 스타일 */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 5px;
-    border-bottom: 2px solid #d7ccc8;
-}
-.stTabs [data-baseweb="tab"] {
-    height: 50px;
-    background-color: #fafafa;
-    border-radius: 8px 8px 0 0;
-    color: #795548;
+/* 탭 스타일 (요청 반영: 넓게 퍼지도록 수정) */
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 0px;
+    border-bottom: 2px solid #cfd8dc;
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+}}
+.stTabs [data-baseweb="tab"] {{
+    height: 55px;
+    background-color: #f7f9fa;
+    border-right: 1px solid #eceff1;
+    color: #607d8b;
     font-weight: 700;
-    border: 1px solid transparent;
     font-size: 1rem;
-}
-.stTabs [aria-selected="true"] {
+    flex-grow: 1; /* 탭이 화면 너비를 꽉 채우도록 설정 */
+    text-align: center;
+    justify-content: center;
+}}
+.stTabs [aria-selected="true"] {{
     background-color: #fff;
-    color: #3e2723;
-    border: 1px solid #d7ccc8;
-    border-bottom: 1px solid #fff;
-}
+    color: {COLOR_RED}; /* 선택된 탭 레드 */
+    border-bottom: 3px solid {COLOR_RED};
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}}
+
+/* 테이블 헤더 스타일 */
+[data-testid="stDataFrame"] thead th {{
+    background-color: {COLOR_NAVY} !important;
+    color: white !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}}
+[data-testid="stDataFrame"] {{
+    border: 1px solid #cfd8dc;
+}}
 
 /* 인쇄용 설정 */
-@media print {
-    @page { size: A4 landscape; margin: 10mm; }
-    body { -webkit-print-color-adjust: exact; }
-    .block-container { padding: 0 !important; max-width: 100% !important; }
-    .stTabs [data-baseweb="tab-list"], .print-btn-wrapper, .stSelectbox { display: none !important; }
-    .stTabs [role="tabpanel"] { display: block !important; opacity: 1 !important; }
-    .update-time { color: #1565c0 !important; }
-}
+@media print {{
+    @page {{ size: A4 landscape; margin: 10mm; }}
+    body {{ -webkit-print-color-adjust: exact; }}
+    .block-container {{ padding: 0 !important; max-width: 100% !important; }}
+    .stTabs [data-baseweb="tab-list"], .print-btn-wrapper, .stSelectbox {{ display: none !important; }}
+    .stTabs [role="tabpanel"] {{ display: block !important; opacity: 1 !important; }}
+}}
 
 /* 유틸리티 */
-.spacer { margin-bottom: 40px; }
+.spacer {{ margin-bottom: 40px; }}
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
-
-# ----------------- 컬러 팔레트 (브라운 & 블루) -----------------
-# 따뜻한 브라운(Brown)과 신뢰감 있는 파란색(Blue)의 조화
-COLOR_BROWN = "#8d6e63"   # 주요 차트 색상 (브라운)
-COLOR_BLUE = "#1e88e5"    # 주요 차트 색상 (파랑)
-COLOR_BROWN_DARK = "#3e2723"
-COLOR_GREY = "#bdbdbd"
-COLOR_LIGHT_BLUE = "#90caf9"
-
-# 차트용 시퀀스 (브라운, 블루 교차)
-CHART_PALETTE = [COLOR_BROWN, COLOR_BLUE, "#a1887f", "#42a5f5", COLOR_GREY]
 
 # ----------------- 데이터 생성 로직 -----------------
 WEEK_MAP = {
@@ -241,14 +267,14 @@ def get_filtered_data(selected_week):
 
 # ----------------- 포맷팅 유틸리티 -----------------
 def fmt_num(val):
-    """1000단위 콤마, 정수/실수 구분"""
+    """1000단위 콤마"""
     if isinstance(val, (int, np.integer)):
         return f"{val:,}"
     elif isinstance(val, float):
         return f"{val:,.1f}"
     return str(val)
 
-# ----------------- 차트 함수 (브라운 & 블루 적용) -----------------
+# ----------------- 차트 함수 (레드 & 네이비 적용) -----------------
 def create_donut_chart(df, names, values, title):
     total = df[values].sum()
     fig = px.pie(df, names=names, values=values, hole=0.5,
@@ -278,7 +304,7 @@ st.markdown(f"<div class='update-time'>데이터 최종 집계 시간 : {now_str
 components.html(
     """
     <div style="text-align: right; margin-bottom: 10px;">
-        <button onclick="window.print()" style="padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: pointer;">
+        <button onclick="window.print()" style="padding: 8px 16px; border: 1px solid #cfd8dc; border-radius: 4px; background: white; cursor: pointer; color: #455a64; font-weight: bold;">
             🖨️ 인쇄 / PDF 저장
         </button>
     </div>
@@ -328,16 +354,16 @@ with tabs[0]:
         st.markdown('<div class="chart-header">📊 주간 일별 방문자 및 조회수</div>', unsafe_allow_html=True)
         df_melt = df_daily.melt(id_vars='날짜', var_name='구분', value_name='수치')
         fig = px.bar(df_melt, x='날짜', y='수치', color='구분', barmode='group',
-                     color_discrete_map={'총 방문자수 (UV)': COLOR_BROWN, '전체 조회수 (PV)': COLOR_BLUE})
+                     color_discrete_map={'총 방문자수 (UV)': COLOR_GREY, '전체 조회수 (PV)': COLOR_NAVY})
         fig.update_layout(legend=dict(orientation="h", y=1.1), plot_bgcolor='white', margin=dict(t=0))
         st.plotly_chart(fig, use_container_width=True)
         
     with c2:
         st.markdown('<div class="chart-header">📈 3개월 주별 추이 및 발행량</div>', unsafe_allow_html=True)
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=df_weekly['주차'], y=df_weekly['총 방문자수 (UV)'], name='UV', marker_color=COLOR_BROWN))
-        fig.add_trace(go.Bar(x=df_weekly['주차'], y=df_weekly['전체 조회수 (PV)'], name='PV', marker_color=COLOR_BLUE))
-        fig.add_trace(go.Scatter(x=df_weekly['주차'], y=df_weekly['발행기사수'], name='발행기사', yaxis='y2', line=dict(color='#ef4444', width=2)))
+        fig.add_trace(go.Bar(x=df_weekly['주차'], y=df_weekly['총 방문자수 (UV)'], name='UV', marker_color=COLOR_GREY))
+        fig.add_trace(go.Bar(x=df_weekly['주차'], y=df_weekly['전체 조회수 (PV)'], name='PV', marker_color=COLOR_NAVY))
+        fig.add_trace(go.Scatter(x=df_weekly['주차'], y=df_weekly['발행기사수'], name='발행기사', yaxis='y2', line=dict(color=COLOR_RED, width=2.5)))
         fig.update_layout(
             yaxis2=dict(overlaying='y', side='right', title='기사수'),
             legend=dict(orientation="h", y=1.1),
@@ -372,7 +398,7 @@ with tabs[1]:
     df_m['변화(%p)'] = df_m['이번주(%)'] - df_m['지난주(%)']
     
     def color_val(val):
-        color = '#d32f2f' if val > 0 else '#1565c0' if val < 0 else 'black'
+        color = COLOR_RED if val > 0 else COLOR_NAVY if val < 0 else 'black'
         return f'color: {color}'
         
     st.dataframe(
@@ -494,7 +520,7 @@ with tabs[5]:
     st.dataframe(cat_sum, use_container_width=True, hide_index=True)
     
     st.markdown('<div class="chart-header">카테고리별 전체 조회수 비교</div>', unsafe_allow_html=True)
-    fig = px.bar(cat_sum, x='카테고리', y='기사수', text_auto=True, color_discrete_sequence=[COLOR_BROWN])
+    fig = px.bar(cat_sum, x='카테고리', y='기사수', text_auto=True, color_discrete_sequence=[COLOR_NAVY])
     fig.update_layout(plot_bgcolor='white')
     st.plotly_chart(fig, use_container_width=True)
 
@@ -525,5 +551,31 @@ with tabs[7]:
         <div class="section-desc">브랜딩된 필명 관점에서의 기사 성과를 별도로 확인합니다.</div>
     </div>
     """, unsafe_allow_html=True)
-    st.info("필명 데이터가 연동되면 본명 기준과 동일한 형식으로 제공됩니다.")
-    st.dataframe(writers, use_container_width=True, hide_index=True)
+    
+    # 필명 데이터 가공 (본명 추가)
+    pen_names = ['맛객', 'Chef J', '푸드헌터', 'Dr.Kim', 'YoriO', 'Spoon']
+    # 예시: 작성자(본명) 리스트를 기반으로 매핑
+    unique_writers = df_top10['작성자'].unique()
+    
+    # 가상 데이터 생성: 필명 리스트와 본명 매핑
+    df_pen = pd.DataFrame({
+        '필명': pen_names,
+        '본명': [unique_writers[i % len(unique_writers)] for i in range(len(pen_names))],
+        '발행기사수': np.random.randint(3, 15, len(pen_names)),
+        '전체조회수': np.random.randint(3000, 20000, len(pen_names)),
+        '좋아요': np.random.randint(50, 300, len(pen_names)),
+        '댓글': np.random.randint(10, 50, len(pen_names))
+    })
+    
+    df_pen['순위'] = df_pen['전체조회수'].rank(ascending=False).astype(int)
+    df_pen = df_pen.sort_values('순위')
+    
+    # 컬럼 순서 재배치 (요청사항: 필명 옆에 본명 셀 추가)
+    df_pen = df_pen[['순위', '필명', '본명', '발행기사수', '전체조회수', '좋아요', '댓글']]
+    
+    df_pen['기사1건당평균조회수'] = (df_pen['전체조회수'] / df_pen['발행기사수']).astype(int).map('{:,}'.format)
+    df_pen['전체조회수'] = df_pen['전체조회수'].map('{:,}'.format)
+    df_pen['좋아요'] = df_pen['좋아요'].map('{:,}'.format)
+    df_pen['댓글'] = df_pen['댓글'].map('{:,}'.format)
+    
+    st.dataframe(df_pen, use_container_width=True, hide_index=True)
