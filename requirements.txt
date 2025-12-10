@@ -1,3 +1,12 @@
 streamlit
 pandas
 plotly
+# Streamlit 대시보드 구동을 위한 핵심 라이브러리
+streamlit>=1.36.0
+pandas>=2.0.0
+plotly>=5.19.0
+numpy>=1.26.0
+
+# 웹 크롤링 기능(crawl_article_data 함수)을 위한 라이브러리
+requests>=2.31.0
+beautifulsoup4>=4.12.3
